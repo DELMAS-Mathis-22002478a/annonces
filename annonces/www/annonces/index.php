@@ -69,6 +69,37 @@ elseif ( '/annonces/index.php/post' == $uri
 
     $vuePost->display();
 }
+// Ajout d'une condition pour gérer l'URL de la page d'inscription
+elseif ('/annonces/index.php/inscription' == $uri) {
+    // Si le formulaire est soumis
+    if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+        // Récupérer les données du formulaire
+        $login = $_POST['login'];
+        $password = $_POST['password'];
+        $nom = $_POST['nom'];
+        $prenom = $_POST['prenom'];
+
+        // Vérifier si les informations sont valides
+        // Vérification supplémentaire peut être ajoutée pour la robustesse
+        if (!empty($login) && !empty($password) && !empty($nom) && !empty($prenom)) {
+            // Enregistrer l'utilisateur dans la base de données
+            // Assure-toi d'utiliser des requêtes préparées pour éviter les injections SQL
+            $stmt = $data->prepare("INSERT INTO Users (login, password, nom, prenom, date_creation) VALUES (?, ?, ?, ?, NOW())");
+            $stmt->execute([$login, $password, $nom, $prenom]);
+            // Rediriger vers une page de confirmation ou autre page appropriée
+        } else {
+            // Rediriger vers la page d'inscription avec un message d'erreur
+            header("Location: /annonces/index.php/inscription?error=1");
+            exit();
+        }
+    } else {
+        // Afficher la vue d'inscription
+        $layout = new Layout("gui/layout.html");
+        $vueInscription = new ViewInscription($layout);
+        $vueInscription->display();
+    }
+}
+
 else {
     header('Status: 404 Not Found');
     echo '<html><body><h1>My Page NotFound</h1></body></html>';
